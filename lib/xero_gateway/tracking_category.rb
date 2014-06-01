@@ -26,7 +26,7 @@ module XeroGateway
         self.send("#{k}=", v)
       end
     end
-    
+
     def option
        options[0] if options.size == 1
     end
@@ -39,7 +39,8 @@ module XeroGateway
           if self.options.is_a?(Array)
             self.options.each do |option|
               b.Option {
-                b.Name option
+                b.Name option.name
+                b.TrackingOptionID option.tracking_option_id
               }
             end
           else
@@ -69,7 +70,10 @@ module XeroGateway
           when "Name" then tracking_category.name = element.text
           when "Options" then
             element.children.each do |option_child|
-              tracking_category.options << option_child.children.detect {|c| c.name == "Name"}.text
+              tracking_category.options << OpenStruct.new(
+                :tracking_option_id => option_child.children.detect {|c| c.name == "TrackingOptionID"}.text,
+                :name => option_child.children.detect {|c| c.name == "Name"}.text
+              )
             end
           when "Option" then tracking_category.options << element.text
         end
