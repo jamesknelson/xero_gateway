@@ -25,7 +25,7 @@ module XeroGateway
     attr_accessor :line_items_downloaded
 
     # accessible fields
-    attr_accessor :bank_transaction_id, :type, :date, :reference, :status, :contact, :line_items, :bank_account, :url, :is_reconciled, :updated_at
+    attr_accessor :bank_transaction_id, :total, :sub_total, :total_tax, :type, :date, :reference, :status, :contact, :line_items, :bank_account, :url, :is_reconciled, :updated_at
 
     def initialize(params = {})
       @errors ||= []
@@ -98,11 +98,11 @@ module XeroGateway
       @line_items_downloaded
     end
 
-    %w(sub_total tax_total total).each do |line_item_total_type|
-      define_method("#{line_item_total_type}=") do |new_total|
-        instance_variable_set("@#{line_item_total_type}", new_total) unless line_items_downloaded?
-      end
-    end
+    # %w(sub_total tax_total total).each do |line_item_total_type|
+    #   define_method("#{line_item_total_type}=") do |new_total|
+    #     instance_variable_set("@#{line_item_total_type}", new_total) unless line_items_downloaded?
+    #   end
+    # end
 
     # If line items are not downloaded, then attempt a download now (if this record was found to begin with).
     def line_items
