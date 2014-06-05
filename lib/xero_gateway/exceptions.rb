@@ -3,6 +3,19 @@ module XeroGateway
   class AccountsListNotLoadedError < StandardError; end
   class InvalidLineItemError < StandardError; end
 
+  class UnknownXeroError < StandardError
+    def initialize(code, message)
+      @message = message
+      @code = code
+    end
+
+    attr_reader :code
+
+    def message
+      "#{@code}: #{@message}"
+    end
+  end
+
   class ApiException < StandardError
 
     def initialize(type, message, request_xml, response_xml)

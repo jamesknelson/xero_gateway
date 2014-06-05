@@ -80,7 +80,7 @@ module XeroGateway
           when 404
             handle_object_not_found!(response, url)
           else
-            raise "Unknown response code: #{response.code.to_i}"
+            handle_unknown_error!(response)
         end
       end
 
@@ -123,6 +123,13 @@ module XeroGateway
                                  raw_response)
 
         end
+      end
+
+      def handle_unknown_error!(response)
+        raw_response = response.plain_body.force_encoding("UTF-8")
+        code = response.code.to_i
+
+        raise UnknownXeroError.new(code, raw_response)
       end
 
       def handle_object_not_found!(response, request_url)
