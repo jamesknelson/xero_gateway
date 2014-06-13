@@ -152,7 +152,7 @@ module XeroGateway
       bank_transaction_element.children.each do |element|
         case(element.name)
           when "BankTransactionID" then bank_transaction.bank_transaction_id = element.text
-          when "UpdatedDateUTC" then bank_transaction.updated_at = parse_date_time_utc(element.text)
+          when "UpdatedDateUTC" then bank_transaction.updated_date_utc = parse_date_time_utc(element.text)
           when "Type" then bank_transaction.type = element.text
           # when "CurrencyCode" then invoice.currency_code = element.text
           when "Contact" then bank_transaction.contact = Contact.from_xml(element)
