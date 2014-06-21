@@ -3,7 +3,7 @@ module XeroGateway
     
     unless defined? ATTRS
       ATTRS = {
-        "Name"                  => :string, 
+        "Name"                  => :string,
         "TaxType"               => :string,
         "CanApplyToAssets"      => :boolean,
         "CanApplyToEquity"      => :boolean,
@@ -11,7 +11,8 @@ module XeroGateway
         "CanApplyToLiabilities" => :boolean,
         "CanApplyToRevenue"     => :boolean,
         "DisplayTaxRate"        => :float,
-        "EffectiveRate"         => :float
+        "EffectiveRate"         => :float,
+        "Status"                => :string
       }
     end
     

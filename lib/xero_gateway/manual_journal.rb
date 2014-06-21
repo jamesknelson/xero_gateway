@@ -14,6 +14,12 @@ module XeroGateway
       'VOIDED'	=> 'Voided Posted Manual Journal'
     } unless defined?(STATUSES)
 
+    LINE_AMOUNT_TYPES = {
+      "Inclusive" =>        'Invoice lines are inclusive tax',
+      "Exclusive" =>        'Invoice lines are exclusive of tax (default)',
+      "NoTax"     =>        'Invoices lines have no tax'
+    } unless defined?(LINE_AMOUNT_TYPES)
+
     # Xero::Gateway associated with this invoice.
     attr_accessor :gateway
 
@@ -24,7 +30,7 @@ module XeroGateway
     attr_accessor :journal_lines_downloaded
 
     # accessible fields
-    attr_accessor :manual_journal_id, :narration, :date, :status, :journal_lines, :url, :show_on_cash_basis_reports
+    attr_accessor :manual_journal_id, :narration, :date, :status, :journal_lines, :url, :show_on_cash_basis_reports, :line_amount_types
 
     def initialize(params = {})
       @errors ||= []
@@ -32,6 +38,10 @@ module XeroGateway
 
       # Check if the line items have been downloaded.
       @journal_lines_downloaded = (params.delete(:journal_lines_downloaded) == true)
+
+      params = {
+        :line_amount_types => "Exclusive"
+      }.merge(params)
 
       params.each do |k,v|
         self.send("#{k}=", v)
@@ -70,6 +80,10 @@ module XeroGateway
 
       unless date
         @errors << ['date', "can't be blank"]
+      end
+
+      if line_amount_types && !LINE_AMOUNT_TYPES[line_amount_types]
+        @errors << ['line_amount_types', "must be one of #{LINE_AMOUNT_TYPES.keys.join('/')}"]
       end
 
       # Make sure all journal_items are valid.
@@ -143,9 +157,11 @@ module XeroGateway
           when "ManualJournalID" then manual_journal.manual_journal_id = element.text
           when "Date" then manual_journal.date = parse_date(element.text)
           when "Status" then manual_journal.status = element.text
+          when "LineAmountTypes" then manual_journal.line_amount_types = element.text
           when "Narration" then manual_journal.narration = element.text
           when "JournalLines" then element.children.each {|journal_line| manual_journal.journal_lines_downloaded = true; manual_journal.journal_lines << JournalLine.from_xml(journal_line) }
           when "Url" then manual_journal.url = element.text
+          when "ShowOnCashBasisReports" then manual_journal.show_on_cash_basis_reports = (element.text == "true")
         end
       end
       manual_journal
