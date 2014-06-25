@@ -36,7 +36,7 @@ module XeroGateway
     attr_accessor :line_items_downloaded
   
     # All accessible fields
-    attr_accessor :credit_note_id, :credit_note_number, :type, :status, :date, :reference, :line_amount_types, :currency_code, :line_items, :contact, :payments, :fully_paid_on, :amount_credited
+    attr_accessor :credit_note_id, :credit_note_number, :type, :status, :date, :reference, :line_amount_types, :currency_code, :line_items, :contact, :payments, :fully_paid_on, :amount_credited, :updated_date_utc, :remaining_credit
 
     
     def initialize(params = {})
@@ -194,7 +194,8 @@ module XeroGateway
       credit_note_element.children.each do |element|
         case(element.name)
           when "CreditNoteID" then credit_note.credit_note_id = element.text
-          when "CreditNoteNumber" then credit_note.credit_note_number = element.text            
+          when "CreditNoteNumber" then credit_note.credit_note_number = element.text
+          when "UpdatedDateUTC" then credit_note.updated_date_utc = parse_date_time_utc(element.text)
           when "Type" then credit_note.type = element.text
           when "CurrencyCode" then credit_note.currency_code = element.text
           when "Contact" then credit_note.contact = Contact.from_xml(element)
@@ -206,6 +207,7 @@ module XeroGateway
           when "SubTotal" then credit_note.sub_total = BigDecimal.new(element.text)
           when "TotalTax" then credit_note.total_tax = BigDecimal.new(element.text)
           when "Total" then credit_note.total = BigDecimal.new(element.text)
+          when "RemainingCredit" then credit_note.remaining_credit = BigDecimal.new(element.text)
           when "CreditNoteID" then credit_note.credit_note_id = element.text
           when "CreditNoteNumber" then credit_note.credit_note_number = element.text            
           when "Payments" then element.children.each { | payment | credit_note.payments << Payment.from_xml(payment) }
