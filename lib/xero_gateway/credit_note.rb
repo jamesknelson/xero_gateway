@@ -196,6 +196,7 @@ module XeroGateway
           when "CreditNoteID" then credit_note.credit_note_id = element.text
           when "CreditNoteNumber" then credit_note.credit_note_number = element.text
           when "UpdatedDateUTC" then credit_note.updated_date_utc = parse_date_time_utc(element.text)
+          when "FullyPaidOnDate" thene credit_note.full_paid_on = parse_date(element.text)
           when "Type" then credit_note.type = element.text
           when "CurrencyCode" then credit_note.currency_code = element.text
           when "Contact" then credit_note.contact = Contact.from_xml(element)
