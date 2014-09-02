@@ -62,4 +62,5 @@ module XeroGateway
   class PaymentNotFoundError < StandardError; end
   class CreditNoteNotFoundError < StandardError; end
   class ManualJournalNotFoundError < StandardError; end
+  class JournalNotFoundError < StandardError; end
 end

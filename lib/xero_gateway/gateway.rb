@@ -484,6 +484,34 @@ module XeroGateway
       parse_response(response_xml, {:request_params => request_params}, {:request_signature => 'GET/ManualJournal'})
     end
 
+    # Retrieves all journals from Xero
+    #
+    # Usage : get_journals
+    #         get_journals(:journal_id => "297c2dc5-cc47-4afd-8ec8-74990b8761e9")
+    #
+    # Note  : modified_since is in UTC format (i.e. Brisbane is UTC+10)
+    def get_journals(options = {})
+      request_params = {}
+      request_params[:JournalID] = options[:journal_id] if options[:journal_id]
+      request_params[:ModifiedAfter] = options[:modified_since] if options[:modified_since]
+      request_params[:offset] = options[:offset] if options[:offset]
+
+      response_xml = http_get(@client, "#{@xero_url}/Journals", request_params)
+
+      parse_response(response_xml, {:request_params => request_params}, {:request_signature => 'GET/Journals'})
+    end
+
+    # Retrieves a single journal
+    #
+    # Usage : get_journal("297c2dc5-cc47-4afd-8ec8-74990b8761e9") # By ID
+    #         get_journal("OIT-12345") # By number
+    def get_journal(journal_id)
+      request_params = {}
+      url = "#{@xero_url}/Journals/#{URI.escape(journal_id)}"
+      response_xml = http_get(@client, url, request_params)
+      parse_response(response_xml, {:request_params => request_params}, {:request_signature => 'GET/Journal'})
+    end
+
     #
     # Gets all accounts for a specific organization in Xero.
     #
@@ -503,8 +531,11 @@ module XeroGateway
     #
     # Gets all tracking categories for a specific organization in Xero.
     #
-    def get_tracking_categories
-      response_xml = http_get(@client, "#{xero_url}/TrackingCategories")
+    def get_tracking_categories(options={})
+      request_params = {}
+      request_params[:includeArchived] = options[:include_archived] if options[:include_archived]
+
+      response_xml = http_get(@client, "#{xero_url}/TrackingCategories", request_params)
 
       parse_response(response_xml, {}, {:request_signature => 'GET/TrackingCategories'})
     end

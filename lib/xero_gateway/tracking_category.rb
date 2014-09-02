@@ -18,7 +18,7 @@
 #
 module XeroGateway
   class TrackingCategory
-    attr_accessor :tracking_category_id, :name, :options
+    attr_accessor :tracking_category_id, :name, :options, :status
     
     def initialize(params = {})
       @options = []
@@ -68,6 +68,7 @@ module XeroGateway
         case(element.name)
           when "TrackingCategoryID" then tracking_category.tracking_category_id = element.text
           when "Name" then tracking_category.name = element.text
+          when "Status" then tracking_category.status = element.text
           when "Options" then
             element.children.each do |option_child|
               tracking_category.options << OpenStruct.new(
