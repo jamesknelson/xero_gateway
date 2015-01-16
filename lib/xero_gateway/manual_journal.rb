@@ -30,7 +30,7 @@ module XeroGateway
     attr_accessor :journal_lines_downloaded
 
     # accessible fields
-    attr_accessor :manual_journal_id, :narration, :date, :status, :journal_lines, :url, :show_on_cash_basis_reports, :line_amount_types
+    attr_accessor :manual_journal_id, :narration, :date, :status, :journal_lines, :url, :show_on_cash_basis_reports, :line_amount_types, :updated_date_utc
 
     def initialize(params = {})
       @errors ||= []
@@ -162,6 +162,7 @@ module XeroGateway
           when "JournalLines" then element.children.each {|journal_line| manual_journal.journal_lines_downloaded = true; manual_journal.journal_lines << JournalLine.from_xml(journal_line) }
           when "Url" then manual_journal.url = element.text
           when "ShowOnCashBasisReports" then manual_journal.show_on_cash_basis_reports = (element.text == "true")
+          when "UpdatedDateUTC" then manual_journal.updated_date_utc = parse_date_time_utc(element.text)
         end
       end
       manual_journal

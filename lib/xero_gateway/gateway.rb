@@ -721,6 +721,9 @@ module XeroGateway
 
       response_element = REXML::XPath.first(doc, "/Response")
 
+      line_items_forced = !!(request[:request_params] and request[:request_params][:page])
+            
+
       response_element.children.reject { |e| e.is_a? REXML::Text }.each do |element|
         case(element.name)
           when "ID" then response.response_id = element.text
@@ -728,20 +731,28 @@ module XeroGateway
           when "ProviderName" then response.provider = element.text
           when "DateTimeUTC" then response.date_time = element.text
           when "Contact" then response.response_item = Contact.from_xml(element, self)
-          when "Invoice" then response.response_item = Invoice.from_xml(element, self, {:line_items_downloaded => options[:request_signature] != "GET/Invoices"})
+          when "Invoice"
+            lines_downloaded = options[:request_signature] != "GET/Invoices" || line_items_forced
+            response.response_item = Invoice.from_xml(element, self, {:line_items_downloaded => lines_downloaded})
           when "BankTransaction"
-            response.response_item = BankTransaction.from_xml(element, self, {:line_items_downloaded => options[:request_signature] != "GET/BankTransactions"})
+            lines_downloaded = (options[:request_signature] != "GET/BankTransactions") || line_items_forced
+            response.response_item = BankTransaction.from_xml(element, self, {:line_items_downloaded => lines_downloaded})
           when "ManualJournal"
-            response.response_item = ManualJournal.from_xml(element, self, {:journal_lines_downloaded => options[:request_signature] != "GET/ManualJournals"})
+            lines_downloaded = options[:request_signature] != "GET/ManualJournals" || line_items_forced
+            response.response_item = ManualJournal.from_xml(element, self, {:journal_lines_downloaded => lines_downloaded})
           when "Contacts" then element.children.each {|child| response.response_item << Contact.from_xml(child, self) }
-          when "Invoices" then element.children.each {|child| response.response_item << Invoice.from_xml(child, self, {:line_items_downloaded => options[:request_signature] != "GET/Invoices"}) }
+          when "Invoices"
+            lines_downloaded = options[:request_signature] != "GET/Invoices" || line_items_forced
+            element.children.each {|child| response.response_item << Invoice.from_xml(child, self, {:line_items_downloaded => lines_downloaded}) }
           when "BankTransactions"
+            lines_downloaded = (options[:request_signature] != "GET/BankTransactions") || line_items_forced
             element.children.each do |child|
-              response.response_item << BankTransaction.from_xml(child, self, {:line_items_downloaded => options[:request_signature] != "GET/BankTransactions"})
+              response.response_item << BankTransaction.from_xml(child, self, {:line_items_downloaded => lines_downloaded})
             end
           when "ManualJournals"
+            lines_downloaded = options[:request_signature] != "GET/ManualJournals" || line_items_forced
             element.children.each do |child|
-              response.response_item << ManualJournal.from_xml(child, self, {:journal_lines_downloaded => options[:request_signature] != "GET/ManualJournals"})
+              response.response_item << ManualJournal.from_xml(child, self, {:journal_lines_downloaded => lines_downloaded})
             end
           when "CreditNotes" then element.children.each {|child| response.response_item << CreditNote.from_xml(child, self, {:line_items_downloaded => options[:request_signature] != "GET/CreditNotes"}) }
           when "Accounts" then element.children.each {|child| response.response_item << Account.from_xml(child) }

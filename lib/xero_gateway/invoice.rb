@@ -208,7 +208,6 @@ module XeroGateway
       }
     end
     
-    #TODO UpdatedDateUTC
     def self.from_xml(invoice_element, gateway = nil, options = {})
       invoice = Invoice.new(options.merge({:gateway => gateway}))
       invoice_element.children.each do |element|
