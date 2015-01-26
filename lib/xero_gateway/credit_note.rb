@@ -147,7 +147,7 @@ module XeroGateway
       if @attachments.kind_of?(Array)
         @attachments
       else
-        response = @gateway.get_attachments("BankTransactions", invoice_id)
+        response = @gateway.get_attachments("BankTransactions", credit_note_id)
         raise CreditNoteNotFoundError, "CreditNote with ID #{credit_note_id} not found in Xero." unless response.success?
         
         attachments = if response.response_item.kind_of?(Array)
@@ -218,7 +218,7 @@ module XeroGateway
           when "CurrencyCode" then credit_note.currency_code = element.text
           when "Contact" then credit_note.contact = Contact.from_xml(element)
           when "Date" then credit_note.date = parse_date(element.text)
-          when "HasAttachments" then invoice.attachments = element.text == "true" ? nil : []
+          when "HasAttachments" then credit_note.attachments = element.text == "true" ? nil : []
           when "Status" then credit_note.status = element.text
           when "Reference" then credit_note.reference = element.text
           when "LineAmountTypes" then credit_note.line_amount_types = element.text

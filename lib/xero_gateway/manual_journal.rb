@@ -139,7 +139,7 @@ module XeroGateway
       if @attachments.kind_of?(Array)
         @attachments
       else
-        response = @gateway.get_attachments("ManualJournals", invoice_id)
+        response = @gateway.get_attachments("ManualJournals", manual_journal_id)
         raise ManualJournalNotFoundError, "Manual Journal with ID #{manual_journal_id} not found in Xero." unless response.success?
         attachments = if response.response_item.kind_of?(Array)
           response.response_item
@@ -174,7 +174,7 @@ module XeroGateway
           when "Date" then manual_journal.date = parse_date(element.text)
           when "Status" then manual_journal.status = element.text
           when "LineAmountTypes" then manual_journal.line_amount_types = element.text
-          when "HasAttachments" then invoice.attachments = element.text == "true" ? nil : []
+          when "HasAttachments" then manual_journal.attachments = element.text == "true" ? nil : []
           when "Narration" then manual_journal.narration = element.text
           when "JournalLines" then element.children.each {|journal_line| manual_journal.journal_lines_downloaded = true; manual_journal.journal_lines << JournalLine.from_xml(journal_line) }
           when "Url" then manual_journal.url = element.text
