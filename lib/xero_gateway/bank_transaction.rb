@@ -31,7 +31,7 @@ module XeroGateway
     attr_accessor :line_items_downloaded
 
     # accessible fields
-    attr_accessor :bank_transaction_id, :total, :sub_total, :total_tax, :type, :date, :reference, :status, :contact, :line_items, :bank_account, :url, :is_reconciled, :updated_date_utc, :line_amount_types
+    attr_accessor :bank_transaction_id, :total, :sub_total, :total_tax, :type, :date, :reference, :status, :contact, :line_items, :bank_account, :url, :is_reconciled, :updated_date_utc, :line_amount_types, :attachments
 
     def initialize(params = {})
       @errors ||= []
@@ -138,6 +138,23 @@ module XeroGateway
       end
     end
 
+    def attachments
+      if @attachments.kind_of?(Array)
+        @attachments
+      else
+        response = @gateway.get_attachments("BankTransactions", invoice_id)
+        raise BankTransactionNotFoundError, "Bank Transaction with ID #{bank_transaction_id} not found in Xero." unless response.success?
+
+        attachments = if response.response_item.kind_of?(Array)
+          response.response_item
+        elsif response.response_item
+          [response.response_item]
+        else
+          []
+        end
+      end
+    end
+
     def to_xml(b = Builder::XmlMarkup.new)
       b.BankTransaction {
         b.BankTransactionID bank_transaction_id if bank_transaction_id
@@ -170,6 +187,7 @@ module XeroGateway
           when "BankAccount" then bank_transaction.bank_account = Account.from_xml(element)
           when "Date" then bank_transaction.date = parse_date(element.text)
           when "Status" then bank_transaction.status = element.text
+          when "HasAttachments" then invoice.attachments = element.text == "true" ? nil : []
           when "Reference" then bank_transaction.reference = element.text
           when "LineItems" then element.children.each {|line_item| bank_transaction.line_items_downloaded = true; bank_transaction.line_items << LineItem.from_xml(line_item) }
           when "Total" then bank_transaction.total = BigDecimal.new(element.text)

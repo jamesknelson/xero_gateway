@@ -37,7 +37,7 @@ module XeroGateway
     attr_accessor :line_items_downloaded
   
     # All accessible fields
-    attr_accessor :invoice_id, :invoice_number, :invoice_type, :status, :date, :due_date, :reference, :branding_theme_id, :line_amount_types, :currency_code, :line_items, :contact, :payments, :fully_paid_on, :amount_due, :amount_paid, :amount_credited, :sent_to_contact, :url, :updated_date_utc
+    attr_accessor :invoice_id, :invoice_number, :invoice_type, :status, :date, :due_date, :reference, :branding_theme_id, :line_amount_types, :currency_code, :line_items, :contact, :payments, :fully_paid_on, :amount_due, :amount_paid, :amount_credited, :sent_to_contact, :url, :updated_date_utc, :attachments
 
     def initialize(params = {})
       @errors ||= []
@@ -150,6 +150,22 @@ module XeroGateway
         @line_items
       end
     end
+
+    def attachments
+      if @attachments.kind_of?(Array)
+        @attachments
+      else
+        response = @gateway.get_attachments("Invoices", invoice_id)
+        raise InvoiceNotFoundError, "Invoice with ID #{invoice_id} not found in Xero." unless response.success?
+        attachments = if response.response_item.kind_of?(Array)
+          response.response_item
+        elsif response.response_item
+          [response.response_item]
+        else
+          []
+        end
+      end
+    end
     
     def ==(other)
       ["invoice_number", "invoice_type", "status", "reference", "currency_code", "line_amount_types", "contact", "line_items"].each do |field|
@@ -222,6 +238,7 @@ module XeroGateway
           when "UpdatedDateUTC" then invoice.updated_date_utc = parse_date_time_utc(element.text)
           when "Status" then invoice.status = element.text
           when "Reference" then invoice.reference = element.text
+          when "HasAttachments" then invoice.attachments = element.text == "true" ? nil : []
           when "BrandingThemeID" then invoice.branding_theme_id = element.text
           when "LineAmountTypes" then invoice.line_amount_types = element.text
           when "LineItems" then element.children.each {|line_item| invoice.line_items_downloaded = true; invoice.line_items << LineItem.from_xml(line_item) }

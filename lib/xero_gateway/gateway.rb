@@ -150,6 +150,25 @@ module XeroGateway
       parse_response(response_xml, {:request_params => request_params}, {:request_signature => 'GET/Invoices'})
     end
 
+    # Retrieves all attachments from Xero
+    #
+    # Usage : get_invoices
+    #         get_invoices(endpoint, id)
+    #
+    # Note  : modified_since is in UTC format (i.e. Brisbane is UTC+10)
+    def get_attachments(endpoint, endpoint_id_or_number)
+      request_params = {}
+      url = "#{@xero_url}/#{endpoint}/#{URI.escape(endpoint_id_or_number)}/Attachments"
+      response_xml = http_get(@client, url, request_params)
+      parse_response(response_xml, {:request_params => request_params}, {})
+    end
+
+
+    def get_attachment_content(url)
+      request_params = {}
+      response = http_get(@client, url, request_params)
+    end
+
     # Retrieves a single invoice
     #
     # You can get a PDF-formatted invoice by specifying :pdf as the format argument
@@ -755,6 +774,7 @@ module XeroGateway
               response.response_item << ManualJournal.from_xml(child, self, {:journal_lines_downloaded => lines_downloaded})
             end
           when "CreditNotes" then element.children.each {|child| response.response_item << CreditNote.from_xml(child, self, {:line_items_downloaded => options[:request_signature] != "GET/CreditNotes"}) }
+          when "Attachments" then element.children.each {|child| response.response_item << Attachment.from_xml(child) }
           when "Accounts" then element.children.each {|child| response.response_item << Account.from_xml(child) }
           when "TaxRates" then element.children.each {|child| response.response_item << TaxRate.from_xml(child) }
           when "Currencies" then element.children.each {|child| response.response_item << Currency.from_xml(child) }

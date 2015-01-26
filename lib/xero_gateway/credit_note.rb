@@ -36,7 +36,7 @@ module XeroGateway
     attr_accessor :line_items_downloaded
   
     # All accessible fields
-    attr_accessor :credit_note_id, :credit_note_number, :type, :status, :date, :reference, :line_amount_types, :currency_code, :line_items, :contact, :payments, :fully_paid_on, :amount_credited, :updated_date_utc, :remaining_credit
+    attr_accessor :credit_note_id, :credit_note_number, :type, :status, :date, :reference, :line_amount_types, :currency_code, :line_items, :contact, :payments, :fully_paid_on, :amount_credited, :updated_date_utc, :remaining_credit, :attachments
 
     
     def initialize(params = {})
@@ -142,6 +142,23 @@ module XeroGateway
         @line_items
       end
     end
+
+    def attachments
+      if @attachments.kind_of?(Array)
+        @attachments
+      else
+        response = @gateway.get_attachments("BankTransactions", invoice_id)
+        raise CreditNoteNotFoundError, "CreditNote with ID #{credit_note_id} not found in Xero." unless response.success?
+        
+        attachments = if response.response_item.kind_of?(Array)
+          response.response_item
+        elsif response.response_item
+          [response.response_item]
+        else
+          []
+        end
+      end
+    end
     
     def ==(other)
       ["credit_note_number", "type", "status", "reference", "currency_code", "line_amount_types", "contact", "line_items"].each do |field|
@@ -201,6 +218,7 @@ module XeroGateway
           when "CurrencyCode" then credit_note.currency_code = element.text
           when "Contact" then credit_note.contact = Contact.from_xml(element)
           when "Date" then credit_note.date = parse_date(element.text)
+          when "HasAttachments" then invoice.attachments = element.text == "true" ? nil : []
           when "Status" then credit_note.status = element.text
           when "Reference" then credit_note.reference = element.text
           when "LineAmountTypes" then credit_note.line_amount_types = element.text
