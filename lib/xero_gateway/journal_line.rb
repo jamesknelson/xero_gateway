@@ -87,7 +87,7 @@ module XeroGateway
           when "TaxAmount" then journal_line.tax_amount = BigDecimal.new(element.text)
           when "Description" then journal_line.description = element.text
           when "TaxType" then journal_line.tax_type = element.text
-          when "Tracking" then
+          when "TrackingCategories" then
             element.children.each do | tracking_element |
               journal_line.tracking << TrackingCategory.from_xml(tracking_element)
             end
