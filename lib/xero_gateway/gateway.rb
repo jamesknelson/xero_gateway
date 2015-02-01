@@ -773,6 +773,8 @@ module XeroGateway
             element.children.each do |child|
               response.response_item << ManualJournal.from_xml(child, self, {:journal_lines_downloaded => lines_downloaded})
             end
+          when "Journal" then resonpes.response_item = Journal.from_xml(child)
+          when "Journals" then element.children.each { |child| response.response_item << Journal.from_xml(child) }
           when "CreditNotes" then element.children.each {|child| response.response_item << CreditNote.from_xml(child, self, {:line_items_downloaded => options[:request_signature] != "GET/CreditNotes"}) }
           when "Attachments" then element.children.each {|child| response.response_item << Attachment.from_xml(child) }
           when "Accounts" then element.children.each {|child| response.response_item << Account.from_xml(child) }

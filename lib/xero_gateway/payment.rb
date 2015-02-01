@@ -19,7 +19,7 @@ module XeroGateway
 
     def self.from_xml(payment_element)
       payment = Payment.new
-      payment_element.children.each do | element |
+      payment_element.children.each do |element|
         case element.name
           when 'PaymentID'      then payment.payment_id = element.text
           when 'PaymentType'    then payment.payment_type = element.text
@@ -28,10 +28,10 @@ module XeroGateway
           when 'Amount'         then payment.amount = BigDecimal.new(element.text)
           when 'Reference'      then payment.reference = element.text
           when 'CurrencyRate'   then payment.currency_rate = BigDecimal.new(element.text)
-          when 'Invoice'
-            payment.invoice_id = element.elements["//InvoiceID"].text
-            payment.invoice_number = element.elements["//InvoiceNumber"].text
-          when 'Account'        then payment.account_id = element.elements["//AccountID"].text
+          # when 'Invoice'
+          #   payment.invoice_id = element.elements["//InvoiceID"].text
+          #   payment.invoice_number = element.elements["//InvoiceNumber"].text
+#          when 'Account'        then payment.account_id = element.elements["//AccountID"].text
         end
       end
       payment

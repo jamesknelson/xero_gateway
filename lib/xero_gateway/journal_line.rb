@@ -10,7 +10,7 @@ module XeroGateway
     attr_reader :errors
 
     # All accessible fields
-    attr_accessor :journal_line_id, :line_amount, :account_code, :description, :tax_type, :tracking
+    attr_accessor :journal_line_id, :line_amount, :net_amount, :gross_amount, :tax_amount, :account_id, :account_code, :account_type, :description, :tax_type, :tracking
         
     def initialize(params = {})
       @errors ||= []
@@ -78,9 +78,13 @@ module XeroGateway
       journal_line = JournalLine.new
       journal_line_element.children.each do |element|
         case(element.name)
-          when "LineAmount" then journal_line.line_amount = BigDecimal.new(element.text)
-          when "AccountCode" then journal_line.account_code = element.text
           when "JournalLineID" then journal_line.journal_line_id = element.text
+          when "AccountCode" then journal_line.account_code = element.text
+          when "AccountType" then journal_line.account_type = element.text
+          when "LineAmount" then journal_line.line_amount = BigDecimal.new(element.text)
+          when "NetAmount" then journal_line.net_amount = BigDecimal.new(element.text)
+          when "GrossAmount" then journal_line.gross_amount = BigDecimal.new(element.text)
+          when "TaxAmount" then journal_line.tax_amount = BigDecimal.new(element.text)
           when "Description" then journal_line.description = element.text
           when "TaxType" then journal_line.tax_type = element.text
           when "Tracking" then

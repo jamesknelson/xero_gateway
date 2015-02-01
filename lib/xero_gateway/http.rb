@@ -5,6 +5,9 @@ module XeroGateway
     ROOT_CA_FILE = File.join(File.dirname(__FILE__), 'ca-certificates.crt') unless defined? ROOT_CA_FILE
 
     def http_get(client, url, extra_params = {}, headers = {})
+      # Xero gets angry if you request things too fast.
+      sleep 1
+
       http_request(client, :get, url, nil, extra_params, headers)
     end
 

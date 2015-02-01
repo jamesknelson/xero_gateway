@@ -23,7 +23,7 @@ module XeroGateway
     attr_accessor :journal_lines_downloaded
 
     # accessible fields
-    attr_accessor :journal_id, :journal_date, :journal_number, :journal_lines, :reference, :created_date_utc
+    attr_accessor :journal_id, :journal_date, :journal_number, :journal_lines, :reference, :created_date_utc, :source_id, :source_type
 
     def initialize(params = {})
       @errors ||= []
@@ -79,7 +79,10 @@ module XeroGateway
           when "JournalID" then journal.journal_id = element.text
           when "JournalDate" then journal.journal_date = parse_date(element.text)
           when "JournalNumber" then journal.journal_number = element.text
+          when "SourceID" then journal.source_id = element.text
+          when "SourceType" then journal.source_type = element.text
           when "Reference" then journal.reference = element.text
+          when "CreatedDateUTC" then journal.created_date_utc = parse_date_time_utc(element.text)
           when "JournalLines" then element.children.each {|journal_line| journal.journal_lines_downloaded = true; journal.journal_lines << JournalLine.from_xml(journal_line) }
         end
       end
