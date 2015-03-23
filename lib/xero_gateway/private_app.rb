@@ -6,7 +6,8 @@ module XeroGateway
     def initialize(consumer_key, consumer_secret, path_to_private_key, options = {})
       options.merge!(
         :signature_method => 'RSA-SHA1',
-        :private_key_file => path_to_private_key
+        :private_key_file => path_to_private_key,
+        :ca_file => File.dirname(__FILE__) + "/../../cacert.pem"  
       )
       
       @xero_url = options[:xero_url] || "https://api.xero.com/api.xro/2.0"
